@@ -40,20 +40,29 @@ Article.prototype.toHtml = function() {
 
 // ++++++++++++++++++++++++++++++++++++++
 
-// TODO
+// DONE
 /**
  * OVERVIEW of
- * - Describe what the method does
- * - Inputs: identify any inputs and their source
- * - Outputs: identify any outputs and their destination
+ * - This method pushes the Article objects into the Article.all array in order
+ from newest to oldest.
+ * - Inputs: arbitrarily named argument "rows", which represents
+ an array of Article objects/records from the DB, and arguments "a", "b", and
+ * "ele" which each represent an individual Article object from the DB.
+ * - Outputs: the subtraction of two Date objects (ultimately a number of milliseconds).
  */
 Article.loadAll = function(rows) {
-  // TODO: describe what the following code is doing
+  // DONE: describe what the following code is doing
+  //Takes two objects from the database, creates two new Date objects using the
+  //values of the objects' publishedOn properties, and subtracts/compares the two
+  //in order to figure out which object is newest and put them in chronological order.
   rows.sort(function(a,b) {
     return (new Date(b.publishedOn)) - (new Date(a.publishedOn));
   });
 
-  // TODO: describe what the following code is doing
+  // DONE: describe what the following code is doing
+  //Takes each object (represented by "ele") in the "rows" that are passed in,
+  //and uses its key:value pairs to create a new Article object, then pushes it
+  //into the Article.all array.
   rows.forEach(function(ele) {
     Article.all.push(new Article(ele));
   })
@@ -61,25 +70,41 @@ Article.loadAll = function(rows) {
 
 // ++++++++++++++++++++++++++++++++++++++
 
-// TODO
+// DONE
 /**
  * OVERVIEW of
- * - Describe what the method does
- * - Inputs: identify any inputs and their source
- * - Outputs: identify any outputs and their destination
+ * - Makes an AJAX GET request to the /articles route of the Blog.
+ * - Inputs: a callback function which runs after Article.loadAll is executed. (Other
+ * inputs explained below.)
+ * - Outputs: None
  */
 Article.fetchAll = function(callback) {
-  // TODO: describe what the following code is doing
+  // DONE: describe what the following code is doing
+  //Makes an AJAX request to the server for the content at the route, '/articles'
   $.get('/articles')
-  // TODO: describe what the following code is doing
+  // DONE: describe what the following code is doing
+  //After a response is sent back from the server, a function that takes "results"
+  //as an argument checks if the body of the response (in this case, the records in
+  //the DB), has any content (a length > 0).
   .then(
     function(results) {
       if (results.length) { // If records exist in the DB
-        // TODO: describe what the following code is doing
+        // DONE: describe what the following code is doing
+        //Passes results (the body of the response) into loadAll and calls it,
+        //then calls "callback", which is really a placeholder name for
+        //articleView.initIndexPage. Article.fetchAll is called in index.html,
+        //and articleView.initIndexPage is its argument.
         Article.loadAll(results);
         callback();
       } else { // if NO records exist in the DB
-        // TODO: describe what the following code is doing
+        // DONE: describe what the following code is doing
+        //Makes another AJAX request to the server for the content found at the
+        //./data/hackerIpsum.json route. Once content is returned, a function that
+        //takes "rawData" as an argument (which represents the body of the request/all
+        //of the JSON objects found in hackerIpsum.json), creates a new Article out
+        //of each individual JSON object (represented by "item"), and assigns it to a
+        //variable called "article". Then insertRecord() is called on "article", which
+        //adds the newly created Article object to the DB.
         $.getJSON('./data/hackerIpsum.json')
         .then(function(rawData) {
           rawData.forEach(function(item) {
@@ -87,11 +112,14 @@ Article.fetchAll = function(callback) {
             article.insertRecord(); // Add each record to the DB
           })
         })
-        // TODO: describe what the following code is doing
+        // DONE: describe what the following code is doing
+        //Calls Article.fetchAll(callback), which is really like calling
+        //Article.fetchAll(articleView.initIndexPage).
         .then(function() {
           Article.fetchAll(callback);
         })
-        // TODO: describe what the following code is doing
+        // DONE: describe what the following code is doing
+        //Throws an error if the $.getJSON request fails
         .catch(function(err) {
           console.error(err);
         });
@@ -102,20 +130,24 @@ Article.fetchAll = function(callback) {
 
 // ++++++++++++++++++++++++++++++++++++++
 
-// TODO
+// DONE
 /**
  * OVERVIEW of
- * - Describe what the method does
- * - Inputs: identify any inputs and their source
- * - Outputs: identify any outputs and their destination
+ * - Makes an AJAX DELETE request to the /articles route of the Blog to delete
+ * all data from the database, but leaves the table structure intact.
+ * - Inputs: a callback function called "callback"
+ * - Outputs: None
  */
 Article.truncateTable = function(callback) {
-  // TODO: describe what the following code is doing
+  // DONE: describe what the following code is doing
+  //Makes an AJAX DELETE request to the server for the content at the /articles route
   $.ajax({
     url: '/articles',
     method: 'DELETE',
   })
-  // TODO: describe what the following code is doing
+  // DONE: describe what the following code is doing
+  //Console logs the response body, then calls the callback function
+  //(represented by placeholder, "callback") if one is provided.
   .then(function(data) {
     console.log(data);
     if (callback) callback();
@@ -124,17 +156,21 @@ Article.truncateTable = function(callback) {
 
 // ++++++++++++++++++++++++++++++++++++++
 
-// TODO
+// DONE
 /**
  * OVERVIEW of
- * - Describe what the method does
- * - Inputs: identify any inputs and their source
- * - Outputs: identify any outputs and their destination
+ * - Makes an AJAX POST request to server.js for the /articles route of the Blog.
+ * - Inputs: a callback function called "callback"
+ * - Outputs: None
  */
 Article.prototype.insertRecord = function(callback) {
-  // TODO: describe what the following code is doing
+  // DONE: describe what the following code is doing
+  //Makes a $.post request to the server, and provides the server with
+  //the data it needs to execute the SQL command found in app.post('/articles').
   $.post('/articles', {author: this.author, authorUrl: this.authorUrl, body: this.body, category: this.category, publishedOn: this.publishedOn, title: this.title})
-  // TODO: describe what the following code is doing
+  // DONE: describe what the following code is doing
+  //Console logs the response body, then calls the callback function
+  //(represented by placeholder, "callback") if one is provided.
   .then(function(data) {
     console.log(data);
     if (callback) callback();
@@ -143,20 +179,25 @@ Article.prototype.insertRecord = function(callback) {
 
 // ++++++++++++++++++++++++++++++++++++++
 
-// TODO
+// DONE
 /**
  * OVERVIEW of
- * - Describe what the method does
- * - Inputs: identify any inputs and their source
- * - Outputs: identify any outputs and their destination
+ * - Tells the server which record to delete when it recieves an AJAX DELETE request
+ * to the /articles/:id route.
+ * - Inputs: a callback function called "callback"
+ * - Outputs: None
  */
 Article.prototype.deleteRecord = function(callback) {
-  // TODO: describe what the following code is doing
+  // DONE: describe what the following code is doing
+  //Makes an AJAX DELETE request to the server with a url whose /:id parameter
+  //corresponds with a particular record's article_id/primary key.
   $.ajax({
     url: `/articles/${this.article_id}`,
     method: 'DELETE'
   })
-  // TODO: describe what the following code is doing
+  // DONE: describe what the following code is doing
+  //Console logs the response body, then calls the callback function
+  //(represented by placeholder, "callback") if one is provided.
   .then(function(data) {
     console.log(data);
     if (callback) callback();
@@ -165,19 +206,24 @@ Article.prototype.deleteRecord = function(callback) {
 
 // ++++++++++++++++++++++++++++++++++++++
 
-// TODO
+// DONE
 /**
  * OVERVIEW of
- * - Describe what the method does
- * - Inputs: identify any inputs and their source
- * - Outputs: identify any outputs and their destination
+ * - Updates a particlar record in the DB when an AJAX PUT request is sent to
+ the /articles/:id route of the Blog.
+ * - Inputs: a callback function called "callback"
+ * - Outputs: none
  */
 Article.prototype.updateRecord = function(callback) {
-  // TODO: describe what the following code is doing
+  // DONE: describe what the following code is doing
+  //Makes an AJAX PUT request to the /articles/:id route to update the particular
+  //record associated with a specific article_id/primary key
   $.ajax({
     url: `/articles/${this.article_id}`,
     method: 'PUT',
-    data: {  // TODO: describe what this object is doing
+    data: {  // DONE: describe what this object is doing
+      //This object is setting the keys of a single Article object equal to
+      //the keys of the current Article object
       author: this.author,
       authorUrl: this.authorUrl,
       body: this.body,
@@ -186,7 +232,9 @@ Article.prototype.updateRecord = function(callback) {
       title: this.title
     }
   })
-  // TODO: describe what the following code is doing
+  // DONE: describe what the following code is doing
+  //Console logs the response body, then calls the callback function
+  //(represented by placeholder, "callback") if one is provided.
   .then(function(data) {
     console.log(data);
     if (callback) callback();
